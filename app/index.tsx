@@ -128,25 +128,11 @@ export default function TitlePage() {
           </View>
         </View>
 
-        {/* GitHub Login/Sync */}
-        {!isLoggedIn ? (
-          <TouchableOpacity
-            style={styles.githubButton}
-            onPress={handleGitHubLogin}
-            accessibilityLabel="Login with GitHub for cloud sync"
-            accessibilityRole="button"
-          >
-            <View style={styles.githubButtonInner}>
-              <Text style={styles.githubIcon}>🔗</Text>
-              <Text style={styles.githubButtonText}>Login with GitHub</Text>
-              <Text style={styles.githubSubtext}>☁️ Cloud Sync</Text>
-            </View>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.syncBadge}>
-            <Text style={styles.syncBadgeText}>✓ Cloud Sync Enabled</Text>
-          </View>
-        )}
+        {/* GitHub Login - Coming Soon */}
+        <View style={styles.comingSoonBadge}>
+          <Text style={styles.comingSoonText}>💾 Auto-Save Enabled</Text>
+          <Text style={styles.comingSoonSubtext}>Stories saved to your browser</Text>
+        </View>
       </Animated.View>
     </View>
   );
@@ -400,5 +386,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     letterSpacing: 0.5,
+  },
+  comingSoonBadge: {
+    marginTop: 24,
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+    alignItems: 'center',
+  },
+  comingSoonText: {
+    color: '#3b82f6',
+    fontSize: 14,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  comingSoonSubtext: {
+    color: 'rgba(59, 130, 246, 0.8)',
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginTop: 4,
   },
 });
