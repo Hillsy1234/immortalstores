@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://ydnclgvibyjwtfvelruf.supabase.co';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkbmNsZ3ZpYnlqd3RmdmVscnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDU1MzksImV4cCI6MjA2MzkyMTUzOX0.eZJc33XUCuTM1pSeaz6R9lQPFNg5O_ipO00j5RdCBMA';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
