@@ -119,7 +119,7 @@ export default function StoryScreen() {
     }
   }
 
-  function handleSubmitAction() {
+  async function handleSubmitAction() {
     if (!currentAction.trim()) return;
 
     const newEntry: StoryEntry = {
@@ -130,19 +130,55 @@ export default function StoryScreen() {
     };
 
     setStoryEntries([...storyEntries, newEntry]);
+    const userAction = currentAction;
     setCurrentAction('');
-    setIsWriting(false);
+    setIsWriting(true);
 
-    // Simulate next scenario (in real app, this would be generated or selected)
-    setTimeout(() => {
-      const nextScenario: StoryEntry = {
+    try {
+      // Call AI to generate response
+      const response = await fetch('/.netlify/functions/generate-story', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          world,
+          characterName,
+          origin,
+          backstory,
+          action: userAction,
+          storyHistory: storyEntries.slice(-5), // Last 5 entries for context
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const aiResponse: StoryEntry = {
         id: (Date.now() + 1).toString(),
         type: 'scenario',
-        content: 'Your action has consequences... What happens next is up to you to decide and write!',
+        content: data.response,
         timestamp: new Date(),
       };
-      setStoryEntries((prev) => [...prev, nextScenario]);
-    }, 1000);
+
+      setStoryEntries(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Failed to generate story:', error);
+      
+      // Fallback response if AI fails
+      const fallbackResponse: StoryEntry = {
+        id: (Date.now() + 1).toString(),
+        type: 'scenario',
+        content: `As you ${userAction.toLowerCase()}, the world around you shifts. What happens next depends on your choices...`,
+        timestamp: new Date(),
+      };
+      setStoryEntries(prev => [...prev, fallbackResponse]);
+    } finally {
+      setIsWriting(false);
+    }
   }
 
   return (
