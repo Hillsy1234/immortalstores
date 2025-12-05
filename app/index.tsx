@@ -36,7 +36,7 @@ export default function TitlePage() {
 
   function handleGitHubLogin() {
     const config = {
-      clientId: 'Ov23li17YprxO4rI4m2x',
+      clientId: 'Ov23livv873s7GqFqlTz',
       redirectUri: window.location.origin + '/auth/callback',
     };
     

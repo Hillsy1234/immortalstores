@@ -19,8 +19,8 @@ export default function AuthCallback() {
 
       try {
         // For now, hardcode the credentials (will move to serverless function later)
-        const clientId = 'Ov23li17YprxO4rI4m2x';
-        const clientSecret = '22a55a1f1275b1002968f25b6138f17b7b83fdf7';
+        const clientId = 'Ov23livv873s7GqFqlTz';
+        const clientSecret = '6631bf4edbc4f7ad9fb66968bdedc662f40d8c1b';
 
         if (!clientId || !clientSecret) {
           throw new Error('GitHub OAuth credentials not configured');
