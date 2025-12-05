@@ -9,4 +9,5 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  # Environment variables will be loaded from Netlify dashboard
+  EXPO_PUBLIC_GITHUB_CLIENT_ID = "Ov23li17YprxO4rI4m2x"
+  GITHUB_CLIENT_SECRET = "22a55a1f1275b1002968f25b6138f17b7b83fdf7"
