@@ -18,15 +18,8 @@ export default function AuthCallback() {
       }
 
       try {
-        // For now, hardcode the credentials (will move to serverless function later)
-        const clientId = 'Ov23livv873s7GqFqlTz';
-        const clientSecret = '6631bf4edbc4f7ad9fb66968bdedc662f40d8c1b';
-
-        if (!clientId || !clientSecret) {
-          throw new Error('GitHub OAuth credentials not configured');
-        }
-
-        await gistStorage.handleCallback(code as string, clientId, clientSecret);
+        // Use Netlify Function for secure OAuth (no client secret in browser!)
+        await gistStorage.handleCallback(code as string);
         setStatus('success');
         
         // Redirect to home after 2 seconds

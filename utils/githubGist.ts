@@ -55,31 +55,33 @@ export class GitHubGistStorage {
   }
 
   // Handle OAuth callback (call this on redirect page)
-  async handleCallback(code: string, clientId: string, clientSecret: string): Promise<void> {
+  async handleCallback(code: string): Promise<void> {
     try {
-      // Exchange code for access token
-      // Note: In production, this should be done via a serverless function to keep client_secret secure
-      const response = await fetch('https://github.com/login/oauth/access_token', {
+      // Use Netlify Function to exchange code for token (keeps client_secret secure)
+      const functionUrl = '/.netlify/functions/github-auth';
+      
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code: code,
-        }),
+        body: JSON.stringify({ code }),
       });
 
       const data = await response.json();
-      this.accessToken = data.access_token;
-      localStorage.setItem(STORAGE_KEY_TOKEN, this.accessToken!);
 
-      // Fetch user info
-      await this.fetchUserInfo();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      this.accessToken = data.access_token;
+      this.user = data.user;
+
+      // Save to localStorage
+      localStorage.setItem(STORAGE_KEY_TOKEN, this.accessToken);
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(this.user));
     } catch (error) {
-      console.error('GitHub auth failed:', error);
+      console.error('GitHub callback error:', error);
       throw error;
     }
   }

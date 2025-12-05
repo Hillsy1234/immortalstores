@@ -128,11 +128,25 @@ export default function TitlePage() {
           </View>
         </View>
 
-        {/* GitHub Login - Coming Soon */}
-        <View style={styles.comingSoonBadge}>
-          <Text style={styles.comingSoonText}>💾 Auto-Save Enabled</Text>
-          <Text style={styles.comingSoonSubtext}>Stories saved to your browser</Text>
-        </View>
+        {/* GitHub Login/Sync */}
+        {!isLoggedIn ? (
+          <TouchableOpacity
+            style={styles.githubButton}
+            onPress={handleGitHubLogin}
+            accessibilityLabel="Login with GitHub for cloud sync"
+            accessibilityRole="button"
+          >
+            <View style={styles.githubButtonInner}>
+              <Text style={styles.githubIcon}>🔗</Text>
+              <Text style={styles.githubButtonText}>Login with GitHub</Text>
+              <Text style={styles.githubSubtext}>☁️ Save to Gists (Text Files)</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.syncBadge}>
+            <Text style={styles.syncBadgeText}>✓ Syncing to GitHub Gists</Text>
+          </View>
+        )}
       </Animated.View>
     </View>
   );
