@@ -25,9 +25,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    const { world, characterName, origin, backstory, action, storyHistory } = JSON.parse(event.body || '{}');
+    const { world, characterName, origin } = JSON.parse(event.body || '{}');
 
-    if (!world || !characterName || !action) {
+    if (!world || !characterName || !origin) {
       return {
         statusCode: 400,
         headers,
@@ -35,53 +35,43 @@ const handler: Handler = async (event) => {
       };
     }
 
-    // Build context from story history
-    const historyContext = storyHistory && storyHistory.length > 0
-      ? storyHistory.slice(-5).map((entry: any) => `${entry.type === 'action' ? 'Player' : 'Story'}: ${entry.content}`).join('\n')
-      : '';
+    // Generate backstory only
+    const prompt = `Create a compelling character backstory for an interactive RPG.
 
-    // Create the prompt
-    const prompt = `You are a creative dungeon master for an interactive RPG story set in a ${world} world.
-
-Character: ${characterName}
+Character Name: ${characterName}
+World: ${world}
 Origin: ${origin}
-Backstory: ${backstory}
 
-Recent story:
-${historyContext}
+Write a rich, 2-3 paragraph backstory that:
+1. Explains their past and how they became who they are
+2. Includes a defining moment or challenge they overcame
+3. Hints at their motivations and goals
+4. Fits the ${world} theme perfectly
 
-The player just did this action: "${action}"
-
-Write a vivid, engaging response (2-3 paragraphs) that:
-1. Describes what happens as a result of their action
-2. Adds sensory details and atmosphere
-3. Presents a new challenge or choice
-4. Stays true to the ${world} theme
-
-Keep it exciting and immersive!`;
+Make it personal, emotional, and inspiring for storytelling.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: `You are an expert storyteller and dungeon master. Create immersive, engaging narratives that respond to player actions. Keep responses concise but vivid (2-3 paragraphs). Always end with a new situation or choice for the player.`,
+          content: `You are a creative writer specializing in character development. Create rich, compelling backstories that inspire players to tell their own stories. Keep it 2-3 paragraphs.`,
         },
         {
           role: 'user',
           content: prompt,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 300,
+      temperature: 0.9,
+      max_tokens: 250,
     });
 
-    const response = completion.choices[0]?.message?.content || 'The story continues...';
+    const backstory = completion.choices[0]?.message?.content || 'A mysterious past shrouds this character...';
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ response }),
+      body: JSON.stringify({ backstory }),
     };
   } catch (error) {
     console.error('OpenAI error:', error);
@@ -89,7 +79,7 @@ Keep it exciting and immersive!`;
       statusCode: 500,
       headers,
       body: JSON.stringify({ 
-        error: 'Failed to generate story',
+        error: 'Failed to generate backstory',
         details: error instanceof Error ? error.message : 'Unknown error'
       }),
     };

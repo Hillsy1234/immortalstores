@@ -20,8 +20,39 @@ export default function CharacterCreateScreen() {
   const [characterName, setCharacterName] = useState('');
   const [origin, setOrigin] = useState('');
   const [backstory, setBackstory] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  function handleCreateCharacter() {
+  async function handleGenerateBackstory() {
+    if (!characterName.trim() || !origin.trim()) {
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/.netlify/functions/generate-story', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          world,
+          characterName: characterName.trim(),
+          origin: origin.trim(),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.backstory) {
+        setBackstory(data.backstory);
+      }
+    } catch (error) {
+      console.error('Failed to generate backstory:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  function handleContinue() {
     if (!characterName.trim() || !origin.trim() || !backstory.trim()) {
       return;
     }
@@ -30,9 +61,9 @@ export default function CharacterCreateScreen() {
       pathname: '/story',
       params: {
         world,
-        characterName,
-        origin,
-        backstory,
+        characterName: characterName.trim(),
+        origin: origin.trim(),
+        backstory: backstory.trim(),
       },
     });
   }
@@ -101,6 +132,17 @@ export default function CharacterCreateScreen() {
               <Text style={styles.label}>
                 Backstory
               </Text>
+              <TouchableOpacity
+                style={styles.aiButton}
+                onPress={handleGenerateBackstory}
+                disabled={!characterName.trim() || !origin.trim() || isGenerating}
+                accessibilityLabel="Generate backstory with AI"
+                accessibilityRole="button"
+              >
+                <Text style={styles.aiButtonText}>
+                  {isGenerating ? '✨ Generating...' : '✨ AI Generate'}
+                </Text>
+              </TouchableOpacity>
             </View>
             <TextInput
               style={[
@@ -110,7 +152,7 @@ export default function CharacterCreateScreen() {
               ]}
               value={backstory}
               onChangeText={setBackstory}
-              placeholder="Tell us about their past, motivations, and personality..."
+              placeholder="Tell us about their past, motivations, and personality... (or use AI to generate)"
               placeholderTextColor="rgba(255, 255, 255, 0.5)"
               multiline
               numberOfLines={6}
@@ -125,7 +167,7 @@ export default function CharacterCreateScreen() {
             styles.createButton,
             !isFormValid && styles.createButtonDisabled,
           ]}
-          onPress={handleCreateCharacter}
+          onPress={handleContinue}
           disabled={!isFormValid}
           accessibilityLabel="Create character and start story"
           accessibilityRole="button"
