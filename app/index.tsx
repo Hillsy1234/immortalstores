@@ -36,14 +36,9 @@ export default function TitlePage() {
 
   function handleGitHubLogin() {
     const config = {
-      clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID || '',
+      clientId: 'Ov23li17YprxO4rI4m2x',
       redirectUri: window.location.origin + '/auth/callback',
     };
-    
-    if (!config.clientId) {
-      alert('GitHub OAuth not configured. Please set EXPO_PUBLIC_GITHUB_CLIENT_ID in .env file. See GITHUB_SETUP.md for instructions.');
-      return;
-    }
     
     gistStorage.startAuth(config);
   }
