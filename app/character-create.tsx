@@ -257,7 +257,8 @@ const styles = StyleSheet.create({
   labelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   labelIcon: {
     fontSize: 20,
@@ -267,6 +268,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.5,
+  },
+  aiButton: {
+    backgroundColor: 'rgba(147, 51, 234, 0.3)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#9333ea',
+  },
+  aiButtonText: {
+    color: '#c084fc',
+    fontSize: 12,
+    fontWeight: '600',
   },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
