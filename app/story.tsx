@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { storage } from '../utils/storage';
 import { gistStorage } from '../utils/githubGist';
+import { submitStoryForModeration, PublicStory } from '../utils/supabase';
 
 interface StoryEntry {
   id: string;
@@ -39,6 +41,8 @@ export default function StoryScreen() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [gistId, setGistId] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   // Load saved story on mount
   useEffect(() => {
@@ -136,6 +140,42 @@ export default function StoryScreen() {
     // Users write their own story, or others can contribute
   }
 
+  async function handleShareStory() {
+    if (storyEntries.length === 0) {
+      Alert.alert('No Story Yet', 'Write some story first before sharing!');
+      return;
+    }
+
+    setIsSharing(true);
+    setShareSuccess(false);
+
+    try {
+      const publicStory: PublicStory = {
+        user_id: gistStorage.getUser()?.login || 'anonymous',
+        user_name: gistStorage.getUser()?.name || characterName,
+        character_name: characterName,
+        world,
+        origin,
+        backstory,
+        story_entries: storyEntries,
+      };
+
+      const result = await submitStoryForModeration(publicStory);
+
+      if (result.success) {
+        setShareSuccess(true);
+        Alert.alert('Success!', 'Story submitted for moderation! It will appear in the public gallery once approved.');
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error('Failed to share story:', error);
+      Alert.alert('Error', 'Failed to share story. Please try again.');
+    } finally {
+      setIsSharing(false);
+    }
+  }
+
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
       <StatusBar style="light" />
@@ -213,20 +253,37 @@ export default function StoryScreen() {
 
       <View style={styles.actionPanel}>
         {!isWriting ? (
-          <TouchableOpacity
-            style={styles.writeButton}
-            onPress={() => setIsWriting(true)}
-            accessibilityLabel="Write your action"
-            accessibilityRole="button"
-          >
-            <View style={styles.writeButtonInner}>
-              <Text style={styles.writeButtonIcon}>✍️</Text>
-              <Text style={styles.writeButtonText}>
-                Write Your Action
-              </Text>
-              <Text style={styles.writeButtonArrow}>→</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.writeButton, styles.flexButton]}
+              onPress={() => setIsWriting(true)}
+              accessibilityLabel="Write your action"
+              accessibilityRole="button"
+            >
+              <View style={styles.writeButtonInner}>
+                <Text style={styles.writeButtonIcon}>✍️</Text>
+                <Text style={styles.writeButtonText}>
+                  Write
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.shareButton, shareSuccess && styles.shareButtonSuccess]}
+              onPress={handleShareStory}
+              disabled={isSharing || storyEntries.length === 0}
+              accessibilityLabel="Share story for moderation"
+              accessibilityRole="button"
+            >
+              <View style={styles.shareButtonInner}>
+                <Text style={styles.shareButtonIcon}>
+                  {isSharing ? '⏳' : shareSuccess ? '✓' : '🌍'}
+                </Text>
+                <Text style={styles.shareButtonText}>
+                  {isSharing ? 'Sharing...' : shareSuccess ? 'Shared!' : 'Share'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         ) : (
           <View style={styles.writeContainer}>
             <TextInput
@@ -458,6 +515,13 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     gap: 12,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  flexButton: {
+    flex: 1,
+  },
   writeButton: {
     borderRadius: 30,
     overflow: 'hidden',
@@ -489,6 +553,39 @@ const styles = StyleSheet.create({
     color: '#1a1a2e',
     fontSize: 20,
     fontWeight: '700',
+  },
+  shareButton: {
+    borderRadius: 30,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(16, 185, 129, 0.3)',
+    borderWidth: 2,
+    borderColor: '#10b981',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    minWidth: 120,
+  },
+  shareButtonSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.5)',
+  },
+  shareButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  shareButtonIcon: {
+    fontSize: 20,
+  },
+  shareButtonText: {
+    color: '#10b981',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   writeContainer: {
     gap: 12,
